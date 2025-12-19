@@ -1,0 +1,167 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+    
+    function isCourier() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.courier == true;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.roles.admin == true;
+    }
+
+    // Users Collection
+    match /users/{uid} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid) && 
+                      // Cannot update points or membership directly (must use Cloud Functions)
+                      !request.resource.data.diff(resource.data).affectedKeys().hasAny(['points', 'member']);
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
+    // Addresses Collection
+    match /addresses/{addressId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
+    }
+
+    // Payment Methods Collection
+    match /payment_methods/{methodId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
+    }
+
+    // Pickup Rates (read-only for users)
+    match /pickup_rates/{category} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Pickup Slots (read-only for users, write for admin)
+    match /pickup_slots/{slotId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Pickup Requests
+    match /pickup_requests/{requestId} {
+      allow read: if isAuthenticated() && 
+                    (resource.data.uid == request.auth.uid || isCourier() || isAdmin());
+      allow create: if isAuthenticated() && request.resource.data.uid == request.auth.uid;
+      allow update: if isAuthenticated() && 
+                      (resource.data.uid == request.auth.uid || isCourier() || isAdmin());
+      allow delete: if isOwner(resource.data.uid) || isAdmin();
+    }
+
+    // Pickup Tasks (courier only)
+    match /pickup_tasks/{taskId} {
+      allow read: if isAuthenticated() && 
+                    (resource.data.courierId == request.auth.uid || isAdmin());
+      allow write: if isAdmin();
+      // Status updates MUST go through Cloud Function
+    }
+
+    // Point Ledger (read-only, created by Cloud Functions)
+    match /point_ledger/{ledgerId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow write: if false; // Only Cloud Functions can write
+    }
+
+    // Coupons
+    match /coupons/{couponId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow write: if false; // Only Cloud Functions can write
+    }
+
+    // Redeem Requests
+    match /redeem_requests/{requestId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if false; // Must use Cloud Function
+      allow update, delete: if false;
+    }
+
+    // Events
+    match /events/{eventId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Event Items
+    match /event_items/{itemId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Voucher Scans (partner only)
+    match /voucher_scans/{scanId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated(); // Partner can scan
+      allow update, delete: if isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow update: if isAuthenticated() && 
+                      resource.data.uid == request.auth.uid && 
+                      // Only allow updating isRead field
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']);
+      allow create, delete: if false; // Only Cloud Functions can create/delete
+    }
+
+    // Chat Threads
+    match /chats/{threadId} {
+      allow read: if isAuthenticated() && 
+                    request.auth.uid in resource.data.participants;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+                      request.auth.uid in resource.data.participants;
+      
+      // Chat Messages
+      match /messages/{messageId} {
+        allow read: if isAuthenticated() && 
+                      request.auth.uid in get(/databases/$(database)/documents/chats/$(threadId)).data.participants;
+        allow create: if isAuthenticated() && 
+                        request.resource.data.fromUid == request.auth.uid;
+        allow update: if isAuthenticated() && 
+                        (request.resource.data.fromUid == request.auth.uid || 
+                         request.resource.data.toUid == request.auth.uid);
+        allow delete: if false;
+      }
+    }
+
+    // Membership Plans (read-only)
+    match /membership_plans/{planId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Payment Transactions
+    match /payment_transactions/{txId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if false; // Must use Cloud Function
+      allow update, delete: if false;
+    }
+
+    // Default: deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="TRASH2HEAL - Waste Management & Recycling Rewards">
+  
+  <!-- ✅ REMOVED duplicate viewport - Flutter will add its own -->
+  
+  <!-- iOS meta tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="TRASH2HEAL">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>TRASH2HEAL</title>
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+    }
+    
+    #loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #2E7D32;
+      z-index: 9999;
+    }
+    
+    .loader {
+      border: 8px solid #f3f3f3;
+      border-top: 8px solid #ffffff;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .loading-text {
+      color: white;
+      margin-top: 20px;
+      font-family: 'Inter', sans-serif;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading indicator -->
+  <div id="loading">
+    <div style="text-align: center;">
+      <div class="loader"></div>
+      <div class="loading-text">Loading TRASH2HEAL...</div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK v9 (Modular) -->
+  <script type="module">
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
+    import { getAuth } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+    import { getFirestore } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+    import { getStorage } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
+    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics.js';
+
+    // TRASH2HEAL Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyDx0h8yZI6UuP9VIsJt49GrZj7vKO6xPes",
+      authDomain: "trash2heal.firebaseapp.com",
+      projectId: "trash2heal",
+      storageBucket: "trash2heal.firebasestorage.app",
+      messagingSenderId: "503352459716",
+      appId: "1:503352459716:web:87e2d08b2be461aa216491",
+      measurementId: "G-HGDGDBF7LG"
+    };
+
+    // Initialize Firebase
+    try {
+      const app = initializeApp(firebaseConfig);
+      window.firebaseApp = app;
+      
+      // Initialize services and expose to window
+      window.firebaseAuth = getAuth(app);
+      window.firebaseFirestore = getFirestore(app);
+      window.firebaseStorage = getStorage(app);
+      window.firebaseAnalytics = getAnalytics(app);
+      
+      console.log('✅ Firebase Web initialized successfully');
+    } catch (error) {
+      console.error('❌ Firebase initialization error:', error);
+    }
+  </script>
+
+  <!-- ✅ CLEANED UP: Single Flutter loading script -->
+  <script src="flutter.js" defer></script>
+  <script>
+    window.addEventListener('load', function(ev) {
+      // Download main.dart.js
+      _flutter.loader.loadEntrypoint({
+        serviceWorker: {
+          serviceWorkerVersion: null,
+        },
+        onEntrypointLoaded: function(engineInitializer) {
+          engineInitializer.initializeEngine().then(function(appRunner) {
+            appRunner.runApp();
+            
+            // ✅ Hide loading indicator after Flutter loads
+            setTimeout(function() {
+              var loading = document.getElementById('loading');
+              if (loading) {
+                loading.style.display = 'none';
+                console.log('✅ Loading screen hidden');
+              }
+            }, 1000);
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>

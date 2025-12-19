@@ -1,0 +1,176 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function role() {
+      return request.auth.token.role;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        role() == 'admin' ||
+        // Fallback: check Firestore user document role == 'admin'
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+      );
+    }
+
+    function isCourier() {
+      return isSignedIn() && role() == 'courier';
+    }
+
+    function isUser() {
+      return isSignedIn() && role() == 'user';
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Users
+    match /users/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create: if isSignedIn() && request.auth.uid == uid;
+      allow update, delete: if isOwner(uid) || isAdmin();
+    }
+
+    // Addresses
+    match /addresses/{id} {
+      allow create: if isAdmin() ||
+        (isSignedIn() && request.resource.data.userId == request.auth.uid);
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow update, delete: if isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+    }
+
+    // Addresses as subcollection: /users/{uid}/addresses/{addrId}
+    match /users/{uid}/addresses/{addrId} {
+      allow read, write: if isSignedIn() && request.auth.uid == uid;
+    }
+
+    // Pickup Requests
+    match /pickupRequests/{id} {
+      // Allow any signed-in user to create for themselves (claim role optional)
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow read: if isAdmin() ||
+        (isSignedIn() &&
+          (resource.data.userId == request.auth.uid ||
+           resource.data.courierId == request.auth.uid ||
+           // Kurir boleh baca yang belum ditugaskan (courierId null/tidak ada) untuk self-assign
+           (isCourier() &&
+             (!resource.data.keys().hasAny(['courierId']) ||
+              resource.data.courierId == null))));
+      allow update: if isAdmin() ||
+        (isUser() && resource.data.userId == request.auth.uid) ||
+        (isCourier() && resource.data.courierId == request.auth.uid);
+    }
+
+    // Pickup Tasks
+    match /pickupTasks/{id} {
+      allow read: if isAdmin() ||
+        (isSignedIn() &&
+          (resource.data.userId == request.auth.uid ||
+           resource.data.courierId == request.auth.uid));
+      allow update: if isAdmin() ||
+        (isCourier() && resource.data.courierId == request.auth.uid);
+    }
+
+    // Pickup Slots & Rates (admin manage)
+    match /pickupSlots/{id} {
+      allow read: if true;
+      // Admin full access; user/courier boleh update untuk reservasi kapasitas
+      allow update: if isAdmin() || isSignedIn();
+      allow create, delete: if isAdmin();
+    }
+
+    match /pickupRates/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Points / ledger
+    match /pointLedgers/{id} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    // Coupons & redeem requests
+    match /coupons/{id} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isAdmin() ||
+        (isSignedIn() && request.resource.data.userId == request.auth.uid);
+      allow update: if isAdmin();
+    }
+
+    match /redeemRequests/{id} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAdmin();
+    }
+
+    // Memberships & payments
+    match /memberships/{id} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    match /payments/{id} {
+      allow read: if isAdmin() ||
+        (isSignedIn() && resource.data.userId == request.auth.uid);
+      allow write: if isAdmin();
+    }
+
+    // Events
+    match /events/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    match /eventItems/{id} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // Notifications
+    match /notifications/{id} {
+      allow read, update: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isAdmin();
+    }
+
+    // Chat
+    match /chatThreads/{id} {
+      function isParticipant() {
+        return isSignedIn() && resource.data.participants.hasAny([request.auth.uid]);
+      }
+      function isParticipantCreate() {
+        return isSignedIn() && request.resource.data.participants.hasAny([request.auth.uid]);
+      }
+      allow read: if isParticipant() || isAdmin();
+      allow create: if isParticipantCreate();
+      allow update: if isParticipant() || isAdmin();
+    }
+
+    match /chatMessages/{id} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isAdmin();
+    }
+
+    // Voucher scans
+    match /voucherScans/{id} {
+      allow read, create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

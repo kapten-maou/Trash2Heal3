@@ -1,0 +1,26 @@
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "trash2heal",
+          "configurations": {
+            "ios": "1:503352459716:ios:1b7eb6d0eda8d05e216491",
+            "macos": "1:503352459716:ios:1b7eb6d0eda8d05e216491",
+            "web": "1:503352459716:web:87e2d08b2be461aa216491",
+            "windows": "1:503352459716:web:00ae428c4f5f55dc216491"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "database": "(default)",
+    "location": "asia-southeast1",
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

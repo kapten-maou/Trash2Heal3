@@ -1,0 +1,270 @@
+// SCREEN 1: Task Detail
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:trash2heal_shared/trash2heal_shared.dart';
+import '../../providers/courier_provider.dart';
+import '../../widgets/status_progress.dart';
+import '../../../../common/widgets/primary_button.dart';
+
+class CourierTaskDetailScreen extends ConsumerStatefulWidget {
+  final String taskId;
+  const CourierTaskDetailScreen({super.key, required this.taskId});
+
+  @override
+  ConsumerState<CourierTaskDetailScreen> createState() =>
+      _CourierTaskDetailScreenState();
+}
+
+class _CourierTaskDetailScreenState
+    extends ConsumerState<CourierTaskDetailScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref.read(courierProvider.notifier).selectTask(widget.taskId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final courierState = ref.watch(courierProvider);
+    final task = courierState.selectedTask;
+
+    if (task == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text('DETAIL TUGAS',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.map),
+            onPressed: () => _openMaps(task.address),
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('#${task.id.substring(0, 8).toUpperCase()}',
+                style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280))),
+            const SizedBox(height: 16),
+            _buildInfoCard('CUSTOMER', Icons.person, [
+              Text(task.address['recipientName'] ?? 'Customer',
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () => _callPhone(task.address['phone']),
+                child: Row(
+                  children: [
+                    Text(task.address['phone'] ?? '',
+                        style: const TextStyle(
+                            fontSize: 14, color: Color(0xFF3B82F6))),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.phone, size: 16, color: Color(0xFF3B82F6)),
+                  ],
+                ),
+              ),
+            ]),
+            _buildInfoCard('LOKASI', Icons.location_on, [
+              Text(task.address['fullAddress'] ?? '',
+                  style: const TextStyle(fontSize: 14)),
+              Text('${task.address['city']}, ${task.address['postalCode']}',
+                  style: const TextStyle(fontSize: 14)),
+              const SizedBox(height: 8),
+              ElevatedButton.icon(
+                onPressed: () => _openMaps(task.address),
+                icon: const Icon(Icons.map, size: 16),
+                label: const Text('BUKA DI MAPS'),
+                style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.primary),
+              ),
+            ]),
+            _buildInfoCard('JADWAL', Icons.calendar_today, [
+              Text(_formatDate(task.date),
+                  style: const TextStyle(
+                      fontSize: 14, fontWeight: FontWeight.w600)),
+              Text(task.timeRange, style: const TextStyle(fontSize: 14)),
+              Text('Zona ${task.zone}', style: const TextStyle(fontSize: 14)),
+            ]),
+            _buildInfoCard('DETAIL SAMPAH', Icons.recycling, [
+              ...task.quantities.entries
+                  .map((entry) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(entry.key ?? '',
+                                style: const TextStyle(fontSize: 14)),
+                            Text('${entry.value} kg',
+                                style: const TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ))
+                  .toList(),
+              const Divider(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Estimasi Total',
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                  Text('~${task.estimatedWeight} kg',
+                      style: const TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ]),
+            StatusProgress(currentStatus: task.status),
+            const SizedBox(height: 80),
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: Colors.white, boxShadow: [
+          BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, -2))
+        ]),
+        child: SafeArea(
+          top: false,
+          child: PrimaryButton(
+            text: _getActionButtonText(task.status),
+            onPressed: () => _handleAction(task.status, task.id),
+            isLoading: courierState.isLoading,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, IconData icon, List<Widget> children) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE5E7EB))),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon,
+                  size: 20, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(width: 8),
+              Text(title,
+                  style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF6B7280),
+                      letterSpacing: 1)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  String _getActionButtonText(PickupStatus status) {
+    switch (status) {
+      case PickupStatus.pending:
+      case PickupStatus.assigned:
+        return 'MULAI PERJALANAN';
+      case PickupStatus.onTheWay:
+        return 'SAYA SUDAH TIBA';
+      case PickupStatus.arrived:
+        return 'MULAI PICKUP';
+      case PickupStatus.pickedUp:
+        return 'UPLOAD BUKTI';
+      default:
+        return 'SELESAI';
+    }
+  }
+
+  Future<void> _handleAction(PickupStatus status, String taskId) async {
+    final notifier = ref.read(courierProvider.notifier);
+
+    switch (status) {
+      case PickupStatus.pending:
+      case PickupStatus.assigned:
+        await notifier.updateTaskStatus(taskId, PickupStatus.onTheWay);
+        break;
+      case PickupStatus.onTheWay:
+        await notifier.updateTaskStatus(taskId, PickupStatus.arrived);
+        break;
+      case PickupStatus.arrived:
+        await notifier.updateTaskStatus(taskId, PickupStatus.pickedUp);
+        break;
+      case PickupStatus.pickedUp:
+        if (!mounted) return;
+        context.push('/courier/task/$taskId/proof');
+        break;
+      default:
+        return;
+    }
+  }
+
+  void _callPhone(String? phone) async {
+    if (phone != null) {
+      final uri = Uri.parse('tel:$phone');
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
+      }
+    }
+  }
+
+  void _openMaps(Map<String, dynamic> address) async {
+    final query =
+        Uri.encodeComponent('${address['fullAddress']}, ${address['city']}');
+    final uri =
+        Uri.parse('https://www.google.com/maps/search/?api=1&query=$query');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    const days = [
+      'Minggu',
+      'Senin',
+      'Selasa',
+      'Rabu',
+      'Kamis',
+      'Jumat',
+      'Sabtu'
+    ];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des'
+    ];
+    return '${days[date.weekday % 7]}, ${date.day} ${months[date.month - 1]} ${date.year}';
+  }
+}
