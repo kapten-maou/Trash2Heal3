@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:trash2heal_app/core/constants/app_images.dart';
 import '../../providers/events_provider.dart';
 
 class EventDetailScreen extends ConsumerStatefulWidget {
@@ -51,9 +52,21 @@ class _EventDetailScreenState extends ConsumerState<EventDetailScreen> {
                       fit: BoxFit.cover,
                     )
                   : Container(
-                      color: Colors.green.shade300,
-                      child: const Icon(Icons.event,
-                          size: 100, color: Colors.white),
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: NetworkImage(AppImages.eventCommunity),
+                          fit: BoxFit.cover,
+                          colorFilter: ColorFilter.mode(
+                            Colors.black38,
+                            BlendMode.darken,
+                          ),
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.event,
+                        size: 100,
+                        color: Colors.white,
+                      ),
                     ),
             ),
           ),

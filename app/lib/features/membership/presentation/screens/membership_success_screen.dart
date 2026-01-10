@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:trash2heal_app/core/constants/app_images.dart';
 import 'package:trash2heal_shared/trash2heal_shared.dart';
 
 class MembershipSuccessScreen extends StatefulWidget {
@@ -58,133 +59,145 @@ class _MembershipSuccessScreenState extends State<MembershipSuccessScreen> {
     final method = _payment?.method.name.toUpperCase() ?? 'METODE';
 
     return Scaffold(
-      body: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.check_circle,
-                        color: Colors.green.shade600,
-                        size: 80,
-                      ),
-                    ),
-                    const SizedBox(height: 32),
-                    const Text(
-                      'Pembayaran Berhasil!',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Membership $tier aktif.',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey.shade700,
-                        fontWeight: FontWeight.w600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    if (expiry != null) ...[
-                      const SizedBox(height: 6),
-                      Text(
-                        'Berlaku hingga ${_formatDate(expiry)}',
-                        style: const TextStyle(
-                            fontSize: 14, color: Color(0xFF6B7280)),
-                      ),
-                    ],
-                    const SizedBox(height: 20),
-                    _InfoCard(
-                      items: [
-                        _InfoRow(label: 'Invoice', value: invoice),
-                        _InfoRow(label: 'Metode', value: method),
-                        if (amount != null)
-                          _InfoRow(
-                            label: 'Total bayar',
-                            value: 'Rp ${formatter.format(amount)}',
-                          ),
-                        if (_membership?.startDate != null)
-                          _InfoRow(
-                            label: 'Aktif sejak',
-                            value: _formatDate(_membership!.startDate),
-                          ),
-                      ],
-                    ),
-                    if (amount != null) ...[
-                      const SizedBox(height: 10),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: const NetworkImage(AppImages.successConfetti),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.white.withOpacity(0.82),
+              BlendMode.lighten,
+            ),
+          ),
+        ),
+        child: SafeArea(
+          child: _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                       Container(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(24),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.green.shade50,
+                          shape: BoxShape.circle,
                         ),
-                        child: Row(
-                          children: const [
-                            Icon(Icons.info_outline,
-                                size: 20, color: Color(0xFF6B7280)),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'Benefit membership sudah aktif. Tagihan tersimpan di riwayat pembayaran.',
+                        child: Icon(
+                          Icons.check_circle,
+                          color: Colors.green.shade600,
+                          size: 80,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      const Text(
+                        'Pembayaran Berhasil!',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        'Membership $tier aktif.',
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Colors.grey.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      if (expiry != null) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          'Berlaku hingga ${_formatDate(expiry)}',
+                          style: const TextStyle(
+                              fontSize: 14, color: Color(0xFF6B7280)),
+                        ),
+                      ],
+                      const SizedBox(height: 20),
+                      _InfoCard(
+                        items: [
+                          _InfoRow(label: 'Invoice', value: invoice),
+                          _InfoRow(label: 'Metode', value: method),
+                          if (amount != null)
+                            _InfoRow(
+                              label: 'Total bayar',
+                              value: 'Rp ${formatter.format(amount)}',
+                            ),
+                          if (_membership?.startDate != null)
+                            _InfoRow(
+                              label: 'Aktif sejak',
+                              value: _formatDate(_membership!.startDate),
+                            ),
+                        ],
+                      ),
+                      if (amount != null) ...[
+                        const SizedBox(height: 10),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3F4F6),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Row(
+                            children: const [
+                              Icon(Icons.info_outline,
+                                  size: 20, color: Color(0xFF6B7280)),
+                              SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'Benefit membership sudah aktif. Tagihan tersimpan di riwayat pembayaran.',
+                                  style: TextStyle(
+                                      fontSize: 12, color: Color(0xFF6B7280)),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 36),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: () => context.go('/membership/plans'),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 14),
+                                side: const BorderSide(color: Color(0xFF18A558)),
+                              ),
+                              child: const Text(
+                                'Lihat Benefit',
                                 style: TextStyle(
-                                    fontSize: 12, color: Color(0xFF6B7280)),
+                                    fontSize: 14, color: Color(0xFF18A558)),
                               ),
                             ),
-                          ],
-                        ),
-                      ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () => context.go('/home'),
+                              style: ElevatedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 14),
+                                backgroundColor: const Color(0xFF18A558),
+                              ),
+                              child: const Text(
+                                'Kembali ke Home',
+                                style:
+                                    TextStyle(fontSize: 14, color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
                     ],
-                    const SizedBox(height: 36),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => context.go('/membership/plans'),
-                            style: OutlinedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 14),
-                              side: const BorderSide(color: Color(0xFF18A558)),
-                            ),
-                            child: const Text(
-                              'Lihat Benefit',
-                              style: TextStyle(
-                                  fontSize: 14, color: Color(0xFF18A558)),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () => context.go('/home'),
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 12, vertical: 14),
-                              backgroundColor: const Color(0xFF18A558),
-                            ),
-                            child: const Text(
-                              'Kembali ke Home',
-                              style:
-                                  TextStyle(fontSize: 14, color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
-                  ],
+                  ),
                 ),
-              ),
+        ),
       ),
     );
   }

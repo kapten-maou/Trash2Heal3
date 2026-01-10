@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:trash2heal_app/core/constants/app_images.dart';
 import '../../providers/events_provider.dart';
 
 class EventsScreen extends ConsumerStatefulWidget {
@@ -36,23 +37,50 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
           ? const Center(child: CircularProgressIndicator())
           : events.isEmpty
               ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.event_busy,
-                          size: 80, color: Colors.grey.shade400),
-                      const SizedBox(height: 16),
-                      Text(
-                        'Belum ada event aktif',
-                        style: TextStyle(
-                            fontSize: 18, color: Colors.grey.shade600),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Pantau terus untuk event menarik!',
-                        style: TextStyle(color: Colors.grey.shade500),
-                      ),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          height: 180,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(16),
+                            image: const DecorationImage(
+                              image: NetworkImage(AppImages.eventMeetup),
+                              fit: BoxFit.cover,
+                              colorFilter: ColorFilter.mode(
+                                Colors.black38,
+                                BlendMode.darken,
+                              ),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 12,
+                                offset: const Offset(0, 6),
+                              ),
+                            ],
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Belum ada event aktif',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Pantau terus untuk event menarik!',
+                          style: TextStyle(color: Colors.grey.shade600),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
                   ),
                 )
               : RefreshIndicator(
@@ -106,9 +134,25 @@ class _EventsScreenState extends ConsumerState<EventsScreen> {
             else
               Container(
                 height: 180,
-                color: Colors.green.shade100,
+                decoration: BoxDecoration(
+                  image: const DecorationImage(
+                    image: NetworkImage(AppImages.eventCommunity),
+                    fit: BoxFit.cover,
+                    colorFilter: ColorFilter.mode(
+                      Colors.black38,
+                      BlendMode.darken,
+                    ),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
                 child: const Center(
-                  child: Icon(Icons.event, size: 60, color: Colors.green),
+                  child: Icon(Icons.event, size: 60, color: Colors.white),
                 ),
               ),
 

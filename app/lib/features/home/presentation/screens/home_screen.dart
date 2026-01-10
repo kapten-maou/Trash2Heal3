@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:trash2heal_app/core/constants/app_images.dart';
 import '../../providers/home_provider.dart';
 import '../../widgets/membership_card.dart';
 import '../../widgets/member_status_card.dart';
@@ -35,8 +36,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     Widget _buildHeader() {
       final notifCount = state.notificationsCount ?? 0;
       return Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -44,9 +45,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Color(0xFF0F7A38),
             ],
           ),
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             bottomLeft: Radius.circular(24),
             bottomRight: Radius.circular(24),
+          ),
+          image: const DecorationImage(
+            image: NetworkImage(AppImages.headerCity),
+            fit: BoxFit.cover,
+            colorFilter:
+                ColorFilter.mode(Colors.black26, BlendMode.darken),
           ),
         ),
         padding: const EdgeInsets.fromLTRB(16, 18, 16, 22),
@@ -355,7 +362,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           : 'Dapatkan poin ekstra di akhir pekan',
                       imageUrl: state.events.isNotEmpty
                           ? state.events.first.imageUrl
-                          : 'assets/images/banner_event.png',
+                          : AppImages.eventCommunity,
                       onTap: () => context.push('/events'),
                     ),
 
@@ -388,8 +395,7 @@ class EventBanner extends StatelessWidget {
     final isNetwork = hasImage && imageUrl!.startsWith('http');
     final imageProvider = isNetwork
         ? NetworkImage(imageUrl!)
-        : const AssetImage('assets/images/banner_event.png')
-            as ImageProvider;
+        : const NetworkImage(AppImages.eventCommunity);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
