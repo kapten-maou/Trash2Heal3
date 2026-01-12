@@ -34,64 +34,44 @@ class MembershipProviderNotifier extends ChangeNotifier {
   }
 
   Map<String, dynamic> getTierDetails(String tier) {
-    switch (tier) {
-      case 'silver':
-        return {
-          'name': 'Silver',
-          'price': 50000,
-          'duration': 30,
-          'benefits': [
-            'Point multiplier 1.2x',
-            'Pickup prioritas',
-            '1 kupon gratis'
-          ],
-          'color': Colors.grey,
-          'gradient': [const Color(0xFF9CA3AF), const Color(0xFF6B7280)],
-          'badge': '👑',
-        };
-      case 'gold':
-        return {
-          'name': 'Gold',
-          'price': 99000,
-          'duration': 30,
-          'benefits': [
-            'Point multiplier 1.5x',
-            'Priority pickup',
-            'Exclusive vouchers',
-            'Free delivery',
-          ],
-          'color': const Color.fromARGB(255, 255, 215, 0),
-          'gradient': [const Color(0xFFFBBF24), const Color(0xFFF59E0B)],
-          'badge': '💎',
-        };
-      case 'platinum':
-        return {
-          'name': 'Platinum',
-          'price': 249000,
-          'duration': 90,
-          'benefits': [
-            'Point multiplier 2x',
-            'VIP priority pickup',
-            'Premium vouchers',
-            'Free delivery',
-            'Personal consultant',
-            'Monthly report',
-          ],
-          'color': const Color.fromARGB(255, 229, 228, 226),
-          'gradient': [const Color(0xFF7C3AED), const Color(0xFF2563EB)],
-          'badge': '🏆',
-        };
-      default:
-        return {
-          'name': 'Silver',
-          'price': 0,
-          'duration': 0,
-          'benefits': ['Basic features'],
-          'color': Colors.grey,
-          'gradient': [Colors.grey, Colors.grey.shade600],
-          'badge': '👑',
-        };
-    }
+    final tierEnum = _toTierEnum(tier);
+    final name = MembershipPlans.names[tierEnum] ?? tierEnum.name;
+    final duration = MembershipPlans.durationDays[tierEnum] ?? 0;
+    final price = MembershipPlans.price(tierEnum);
+    final benefits = MembershipPlans.benefits(tierEnum)['features'] as List<dynamic>? ??
+        MembershipPlans.benefits(tierEnum).values.toList();
+
+    // UI-specific styling
+    final gradient = () {
+      switch (tierEnum) {
+        case MembershipTier.basic:
+          return [Colors.grey.shade300, Colors.grey.shade500];
+        case MembershipTier.gold:
+          return [const Color(0xFFFBBF24), const Color(0xFFF59E0B)];
+        case MembershipTier.platinum:
+          return [const Color(0xFF7C3AED), const Color(0xFF2563EB)];
+      }
+    }();
+
+    final badge = () {
+      switch (tierEnum) {
+        case MembershipTier.basic:
+          return '🌱';
+        case MembershipTier.gold:
+          return '💎';
+        case MembershipTier.platinum:
+          return '🏆';
+      }
+    }();
+
+    return {
+      'name': name,
+      'price': price,
+      'duration': duration,
+      'benefits': benefits,
+      'gradient': gradient,
+      'badge': badge,
+    };
   }
 
   Future<void> loadCurrentMembership() async {
@@ -124,6 +104,7 @@ class MembershipProviderNotifier extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final tierEnum = _toTierEnum(_selectedTier);
       final tierDetails = getTierDetails(_selectedTier);
       final now = DateTime.now();
       final generatedCode = 'T2H-${now.millisecondsSinceEpoch}';
@@ -160,8 +141,8 @@ class MembershipProviderNotifier extends ChangeNotifier {
             ? generatedCode
             : null,
         itemDetails: {
-          'tier': _selectedTier,
-          'duration': tierDetails['duration'],
+          'tier': tierEnum.name,
+          'durationDays': tierDetails['duration'],
         },
         createdAt: now,
       );
@@ -184,26 +165,24 @@ class MembershipProviderNotifier extends ChangeNotifier {
     if (uid == null) return false;
 
     try {
+      final tierEnum = _toTierEnum(_selectedTier);
       final tierDetails = getTierDetails(_selectedTier);
       final now = DateTime.now();
       final endDate = now.add(Duration(days: tierDetails['duration'] as int));
-      final tier = _selectedTier.toLowerCase() == 'platinum'
-          ? MembershipTier.platinum
-          : MembershipTier.gold;
 
       final membership = MembershipModel(
         id: '',
         userId: uid,
         userName: '',
         userEmail: '',
-        tier: tier,
+        tier: tierEnum,
         status: MembershipStatus.active,
         startDate: now,
         endDate: endDate,
         durationMonths: (tierDetails['duration'] as int) ~/ 30,
         price: tierDetails['price'] as int,
         paymentId: paymentId,
-        benefits: MembershipBenefits.forTier(tier),
+        benefits: MembershipBenefits.forTier(tierEnum),
         createdAt: now,
         updatedAt: now,
       );
@@ -219,6 +198,18 @@ class MembershipProviderNotifier extends ChangeNotifier {
       _error = e.toString();
       notifyListeners();
       return false;
+    }
+  }
+
+  MembershipTier _toTierEnum(String tier) {
+    switch (tier.toLowerCase()) {
+      case 'basic':
+        return MembershipTier.basic;
+      case 'platinum':
+        return MembershipTier.platinum;
+      case 'gold':
+      default:
+        return MembershipTier.gold;
     }
   }
 }

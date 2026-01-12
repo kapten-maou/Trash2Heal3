@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:trash2heal_app/core/constants/app_images.dart';
 import '../../providers/home_provider.dart';
 import '../../widgets/membership_card.dart';
 import '../../widgets/member_status_card.dart';
@@ -32,12 +31,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(homeProvider);
     final user = state.user;
+    void _onTipTap(EducationTip tip) {
+      // Navigasi ke halaman detail tips lokal
+      context.push('/tips/${tip.id}');
+    }
 
     Widget _buildHeader() {
       final notifCount = state.notificationsCount ?? 0;
       return Container(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
@@ -45,15 +48,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               Color(0xFF0F7A38),
             ],
           ),
-          borderRadius: const BorderRadius.only(
+          borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(24),
             bottomRight: Radius.circular(24),
-          ),
-          image: const DecorationImage(
-            image: NetworkImage(AppImages.headerCity),
-            fit: BoxFit.cover,
-            colorFilter:
-                ColorFilter.mode(Colors.black26, BlendMode.darken),
           ),
         ),
         padding: const EdgeInsets.fromLTRB(16, 18, 16, 22),
@@ -269,43 +266,147 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             PageController(viewportFraction: 0.9, initialPage: 0),
                         itemBuilder: (context, index) {
                           final tip = sampleTips[index];
-                          return Container(
-                            margin: const EdgeInsets.only(right: 12),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(16),
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF18A558), Color(0xFF0F7A38)],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.end,
+                          const gradients = [
+                            [Color(0xFF16A085), Color(0xFF0E7C61)],
+                            [Color(0xFF2E7D32), Color(0xFF1B5E20)],
+                            [Color(0xFF1565C0), Color(0xFF0D47A1)],
+                          ];
+                          final colors = gradients[index % gradients.length];
+
+                          return Semantics(
+                            label: 'Tips: ${tip.title}. ${tip.description}',
+                            child: Container(
+                              margin: const EdgeInsets.only(right: 12),
+                              child: Stack(
                                 children: [
-                                  Text(
-                                    tip.title,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(16),
+                                      gradient: LinearGradient(
+                                        colors: colors,
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                      ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.08),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  const SizedBox(height: 6),
-                                  Text(
-                                    tip.description,
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontSize: 12,
+                                  // Pattern ringan
+                                  Positioned(
+                                    right: -10,
+                                    top: 10,
+                                    child: Container(
+                                      width: 100,
+                                      height: 100,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white.withOpacity(0.06),
+                                      ),
+                                    ),
+                                  ),
+                                  Positioned(
+                                    left: -20,
+                                    bottom: -20,
+                                    child: Container(
+                                      width: 120,
+                                      height: 120,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.white.withOpacity(0.04),
+                                      ),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Container(
+                                              padding: const EdgeInsets.all(8),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white.withOpacity(0.18),
+                                                shape: BoxShape.circle,
+                                              ),
+                                              child: Text(
+                                                tip.badge,
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(width: 10),
+                                            Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 10, vertical: 6),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  Colors.white.withOpacity(0.16),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Text(
+                                                '${tip.badge} Tips #${index + 1}',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w700,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 12),
+                                        Text(
+                                          tip.title,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          tip.description,
+                                          style: const TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 12,
+                                            height: 1.4,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 14),
+                                        Align(
+                                          alignment: Alignment.centerLeft,
+                                          child: OutlinedButton(
+                                            onPressed: () => _onTipTap(tip),
+                                            style: OutlinedButton.styleFrom(
+                                              side: const BorderSide(
+                                                  color: Colors.white, width: 1),
+                                              foregroundColor: Colors.white,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 14, vertical: 8),
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              'Lihat detail',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w700,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ],
@@ -362,7 +463,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           : 'Dapatkan poin ekstra di akhir pekan',
                       imageUrl: state.events.isNotEmpty
                           ? state.events.first.imageUrl
-                          : AppImages.eventCommunity,
+                          : 'assets/images/banner_event.png',
                       onTap: () => context.push('/events'),
                     ),
 
@@ -395,7 +496,8 @@ class EventBanner extends StatelessWidget {
     final isNetwork = hasImage && imageUrl!.startsWith('http');
     final imageProvider = isNetwork
         ? NetworkImage(imageUrl!)
-        : const NetworkImage(AppImages.eventCommunity);
+        : const AssetImage('assets/images/banner_event.png')
+            as ImageProvider;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),

@@ -2,6 +2,9 @@ library trash2heal_shared;
 
 // Services
 export 'services/firebase_service.dart';
+// Shared constants
+export 'constants/status_labels.dart';
+export 'constants/membership_plans.dart';
 
 // User Domain
 export 'models/user_model.dart';

@@ -5,6 +5,7 @@ class CategoryCounterCard extends StatelessWidget {
   final String categoryId;
   final String name;
   final String icon;
+  final String? imageUrl;
   final double value;
   final ValueChanged<double> onChanged;
   final VoidCallback? onIncrement;
@@ -15,6 +16,7 @@ class CategoryCounterCard extends StatelessWidget {
     required this.categoryId,
     required this.name,
     required this.icon,
+    this.imageUrl,
     required this.value,
     required this.onChanged,
     this.onIncrement,
@@ -47,10 +49,38 @@ class CategoryCounterCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(8),
             ),
             child: Center(
-              child: Text(
-                icon,
-                style: const TextStyle(fontSize: 24),
-              ),
+              child: imageUrl != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: Image.network(
+                        imageUrl!,
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.contain,
+                        loadingBuilder: (ctx, child, progress) {
+                          if (progress == null) return child;
+                          return const SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: Center(
+                              child: SizedBox(
+                                width: 14,
+                                height: 14,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (_, __, ___) => Text(
+                          icon,
+                          style: const TextStyle(fontSize: 24),
+                        ),
+                      ),
+                    )
+                  : Text(
+                      icon,
+                      style: const TextStyle(fontSize: 24),
+                    ),
             ),
           ),
           const SizedBox(width: 12),

@@ -203,16 +203,6 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const statuses = <String, String>{
-      'pending': 'Pending',
-      'assigned': 'Assigned',
-      'on_the_way': 'On The Way',
-      'arrived': 'Arrived',
-      'picked_up': 'Picked Up',
-      'completed': 'Completed',
-      'cancelled': 'Cancelled',
-    };
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -269,13 +259,11 @@ class _Header extends StatelessWidget {
                 selected: statusFilter == null,
                 onSelected: () => onStatusSelected(null),
               ),
-              ...statuses.entries.map(
-                (e) => _FilterChip(
-                  label: e.value,
-                  selected: statusFilter == e.key,
-                  onSelected: () => onStatusSelected(e.key),
-                ),
-              ),
+              ...pickupStatusLabelEn.entries.map((e) => _FilterChip(
+                    label: e.value,
+                    selected: statusFilter == e.key.name,
+                    onSelected: () => onStatusSelected(e.key.name),
+                  )),
             ],
           ),
         ),

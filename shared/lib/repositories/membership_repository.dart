@@ -578,6 +578,18 @@ class MembershipRepository {
     }
   }
 
+  /// Static helper so UI can reuse pricing without instantiating repository.
+  static int getTierPriceStatic(MembershipTier tier) {
+    switch (tier) {
+      case MembershipTier.basic:
+        return 0;
+      case MembershipTier.gold:
+        return 99000;
+      case MembershipTier.platinum:
+        return 299000;
+    }
+  }
+
   // Convenience method aliases
   Future<List<MembershipModel>> getByUserId(String userId) =>
       getMembershipsByUser(userId);

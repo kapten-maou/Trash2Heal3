@@ -15,7 +15,8 @@ final pickupsStreamProvider =
   final search = ref.watch(pickupSearchProvider).toLowerCase().trim();
 
   return FirebaseFirestore.instance
-      .collection('pickups')
+      // Use the same collection name as the mobile app/shared repository
+      .collection('pickupRequests')
       .orderBy('createdAt', descending: true)
       .limit(100)
       .snapshots()

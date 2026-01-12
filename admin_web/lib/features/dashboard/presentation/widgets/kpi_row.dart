@@ -12,7 +12,7 @@ class KpiRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final pickupsToday = _countQuery(
       FirebaseFirestore.instance
-          .collection('pickups')
+          .collection('pickupRequests')
           .where(
             'pickupDate',
             isGreaterThanOrEqualTo:

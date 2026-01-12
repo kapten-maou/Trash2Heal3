@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:go_router/go_router.dart';
 
 import '../widgets/kpi_row.dart';
@@ -241,24 +242,30 @@ class _DistributionCard extends StatelessWidget {
               ? const _PlaceholderChart(label: 'Loading...')
               : data.isEmpty
                   ? const Center(child: Text('Tidak ada data'))
-                  : Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  : Row(
                       children: [
                         Expanded(
-                          child: Center(
-                            child: Wrap(
-                              spacing: 12,
-                              runSpacing: 6,
-                              children: data
-                                  .map(
-                                    (e) => Chip(
-                                      label: Text(
-                                          '${e.category}: ${e.weight} kg (${((e.weight / total) * 100).toStringAsFixed(1)}%)'),
-                                      backgroundColor: Colors.green.shade50,
-                                    ),
-                                  )
-                                  .toList(),
+                          flex: 2,
+                          child: PieChart(
+                            PieChartData(
+                              sectionsSpace: 2,
+                              centerSpaceRadius: 40,
+                              sections: _buildSections(data, total),
                             ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 3,
+                          child: Wrap(
+                            spacing: 12,
+                            runSpacing: 8,
+                            children: data
+                                .map((e) => _LegendChip(
+                                      label:
+                                          '${e.category} • ${e.weight} kg (${((e.weight / total) * 100).toStringAsFixed(1)}%)',
+                                      color: _colorForCategory(e.category),
+                                    ))
+                                .toList(),
                           ),
                         ),
                       ],
@@ -266,6 +273,47 @@ class _DistributionCard extends StatelessWidget {
         );
       },
     );
+  }
+
+  List<PieChartSectionData> _buildSections(
+      List<_DistributionSlice> data, int total) {
+    final sections = <PieChartSectionData>[];
+    for (final slice in data) {
+      final percent =
+          total == 0 ? 0.0 : (slice.weight / total.toDouble()) * 100;
+      sections.add(
+        PieChartSectionData(
+          color: _colorForCategory(slice.category),
+          value: percent,
+          title: '${percent.toStringAsFixed(1)}%',
+          radius: 70,
+          titleStyle: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      );
+    }
+    return sections;
+  }
+
+  Color _colorForCategory(String category) {
+    final key = category.toLowerCase();
+    if (key.contains('plast')) return const Color(0xFF3F51B5);
+    if (key.contains('kaca') || key.contains('glass')) {
+      return const Color(0xFF00BCD4);
+    }
+    if (key.contains('kaleng') || key.contains('can')) {
+      return const Color(0xFF9E9E9E);
+    }
+    if (key.contains('kardus') || key.contains('cardboard')) {
+      return const Color(0xFF795548);
+    }
+    if (key.contains('organik') || key.contains('organic')) {
+      return const Color(0xFF2E7D32);
+    }
+    return Colors.green.shade300;
   }
 }
 
@@ -286,6 +334,46 @@ class _PlaceholderChart extends StatelessWidget {
           label,
           style: const TextStyle(color: Colors.grey),
         ),
+      ),
+    );
+  }
+}
+
+class _LegendChip extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _LegendChip({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.4)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: color,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.grey.shade800,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -717,7 +805,7 @@ Future<List<_TrendPoint>> _fetchPickupTrends({int days = 7}) async {
   final start =
       DateTime(now.year, now.month, now.day).subtract(Duration(days: days - 1));
   final snap = await FirebaseFirestore.instance
-      .collection('pickups')
+      .collection('pickupRequests')
       .where('pickupDate', isGreaterThanOrEqualTo: start)
       .get();
 
@@ -761,7 +849,7 @@ Future<List<_DistributionSlice>> _fetchDistribution() async {
   final start =
       DateTime(now.year, now.month, now.day).subtract(const Duration(days: 6));
   final snap = await FirebaseFirestore.instance
-      .collection('pickups')
+      .collection('pickupRequests')
       .where('pickupDate', isGreaterThanOrEqualTo: start)
       .get();
 

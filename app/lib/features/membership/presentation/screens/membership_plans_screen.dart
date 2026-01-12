@@ -39,7 +39,8 @@ class MembershipPlansScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    provider.currentMembership?.tier.name.toUpperCase() ?? 'SILVER',
+                    provider.currentMembership?.tier.name.toUpperCase() ??
+                        'BASIC',
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
@@ -64,15 +65,6 @@ class MembershipPlansScreen extends ConsumerWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-
-            // Silver Plan
-            _buildPlanCard(
-              context,
-              ref,
-              'silver',
-              provider.selectedTier == 'silver',
-            ),
-            const SizedBox(height: 12),
 
             // Gold Plan
             _buildPlanCard(

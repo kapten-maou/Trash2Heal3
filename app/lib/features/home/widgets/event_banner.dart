@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:trash2heal_app/core/constants/app_images.dart';
 
 /// Event banner with image and gradient overlay
 class EventBanner extends StatelessWidget {
@@ -46,7 +45,7 @@ class EventBanner extends StatelessWidget {
                         ),
                       ))
                 : const DecorationImage(
-                    image: NetworkImage(AppImages.eventCommunity),
+                    image: AssetImage('assets/images/banner_event.png'),
                     fit: BoxFit.cover,
                     colorFilter: ColorFilter.mode(
                       Colors.black45,

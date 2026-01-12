@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../constants/branding.dart';
 import '../providers/dev_session_provider.dart';
 
 /// Main admin shell layout: sidebar + topbar + scrollable content area.
@@ -191,10 +192,20 @@ class _AdminTopBar extends StatelessWidget {
                 height: 32,
                 width: 32,
                 decoration: BoxDecoration(
-                  color: Colors.green.shade100,
                   borderRadius: BorderRadius.circular(8),
+                  image: const DecorationImage(
+                    image: NetworkImage(Branding.logoUrl),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-                child: const Icon(Icons.recycling, color: Colors.green, size: 20),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    color: Colors.black.withOpacity(0.2),
+                  ),
+                  child: const Icon(Icons.recycling,
+                      color: Colors.white, size: 18),
+                ),
               ),
               const SizedBox(width: 10),
               Column(
@@ -215,15 +226,15 @@ class _AdminTopBar extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.green.shade50,
+                  color: Color(Branding.envColor).withOpacity(0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'PRODUCTION',
+                child: Text(
+                  Branding.envLabel,
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: Colors.green,
+                    color: Color(Branding.envColor),
                   ),
                 ),
               ),
@@ -304,10 +315,20 @@ class _AdminSidebar extends StatelessWidget {
                     height: 36,
                     width: 36,
                     decoration: BoxDecoration(
-                      color: Colors.green.shade100,
                       borderRadius: BorderRadius.circular(10),
+                      image: const DecorationImage(
+                        image: NetworkImage(Branding.logoUrl),
+                        fit: BoxFit.cover,
+                      ),
                     ),
-                    child: const Icon(Icons.recycling, color: Colors.green),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.black.withOpacity(0.2),
+                      ),
+                      child: const Icon(Icons.recycling,
+                          color: Colors.white, size: 18),
+                    ),
                   ),
                   const SizedBox(width: 8),
                   const Column(

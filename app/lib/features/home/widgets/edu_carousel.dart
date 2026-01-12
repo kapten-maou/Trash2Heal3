@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:trash2heal_app/core/constants/app_images.dart';
 
 /// Educational carousel for waste tips
 class EduCarousel extends StatelessWidget {
@@ -45,10 +44,6 @@ class EduCarousel extends StatelessWidget {
   }
 
   Widget _buildTipCard(BuildContext context, EducationTip tip, int index) {
-    final bgImage = index < sampleTipImages.length
-        ? sampleTipImages[index]
-        : AppImages.eduPlastic;
-
     return Container(
       width: 280,
       margin: const EdgeInsets.only(right: 12),
@@ -70,14 +65,6 @@ class EduCarousel extends StatelessWidget {
             border: Border.all(
               color: Theme.of(context).colorScheme.primary.withOpacity(0.2),
               width: 1,
-            ),
-            image: DecorationImage(
-              image: NetworkImage(bgImage),
-              fit: BoxFit.cover,
-              colorFilter: ColorFilter.mode(
-                Colors.black.withOpacity(0.12),
-                BlendMode.darken,
-              ),
             ),
           ),
           child: Column(
@@ -135,41 +122,45 @@ class EduCarousel extends StatelessWidget {
 
 /// Education tip model
 class EducationTip {
+  final String id;
   final String title;
   final String description;
   final IconData icon;
+  final String badge;
 
   const EducationTip({
+    required this.id,
     required this.title,
     required this.description,
     required this.icon,
+    required this.badge,
   });
 }
 
 /// Sample tips data
 final sampleTips = [
   const EducationTip(
+    id: 'plastik',
     title: 'Pisahkan Plastik',
     description:
         'Pisahkan botol plastik dari tutupnya. Cuci dan keringkan sebelum disetorkan.',
     icon: Icons.recycling,
+    badge: '🧴',
   ),
   const EducationTip(
+    id: 'kardus',
     title: 'Kardus Dilipat',
     description:
         'Lipat kardus agar tidak memakan banyak tempat dan lebih mudah diangkut.',
     icon: Icons.inventory_2,
+    badge: '📦',
   ),
   const EducationTip(
+    id: 'kaca-kaleng',
     title: 'Kaca & Kaleng',
     description:
         'Kumpulkan botol kaca dan kaleng di wadah terpisah untuk keamanan.',
     icon: Icons.local_drink,
+    badge: '🥫',
   ),
-];
-
-final sampleTipImages = [
-  AppImages.eduPlastic,
-  AppImages.eduCardboard,
-  AppImages.eduMetalGlass,
 ];

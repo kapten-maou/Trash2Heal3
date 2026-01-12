@@ -111,13 +111,9 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
               scrollDirection: Axis.horizontal,
               children: [
                 _buildFilterChip('Semua', 'all'),
-                _buildFilterChip('Menunggu', 'pending'),
-                _buildFilterChip('Sedang Proses', 'assigned'),
-                _buildFilterChip('Dalam Perjalanan', 'on_the_way'),
-                _buildFilterChip('Tiba', 'arrived'),
-                _buildFilterChip('Diambil', 'picked_up'),
-                _buildFilterChip('Selesai', 'completed'),
-                _buildFilterChip('Dibatalkan', 'cancelled'),
+                ...pickupStatusLabelId.entries.map(
+                  (e) => _buildFilterChip(e.value, e.key.name),
+                ),
               ],
             ),
           ),
@@ -127,51 +123,23 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen> {
           ? const Center(child: CircularProgressIndicator())
           : requests.isEmpty
               ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                          height: 180,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            image: const DecorationImage(
-                              image: NetworkImage(AppImages.emptyCalm),
-                              fit: BoxFit.cover,
-                              colorFilter: ColorFilter.mode(
-                                Colors.black38,
-                                BlendMode.darken,
-                              ),
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 12,
-                                offset: const Offset(0, 6),
-                              ),
-                            ],
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Belum ada riwayat penjemputan',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Mulai pesan penjemputan sampah Anda',
-                          style: TextStyle(color: Colors.grey.shade600),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.history,
+                          size: 80, color: Colors.grey.shade400),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Belum ada riwayat penjemputan',
+                        style: TextStyle(
+                            fontSize: 18, color: Colors.grey.shade600),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Mulai pesan penjemputan sampah Anda',
+                        style: TextStyle(color: Colors.grey.shade500),
+                      ),
+                    ],
                   ),
                 )
               : RefreshIndicator(

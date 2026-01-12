@@ -11,6 +11,7 @@ import '../features/auth/presentation/screens/register_screen.dart';
 // Home
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/home/presentation/widgets/home_shell.dart';
+import '../features/home/presentation/screens/tip_detail_screen.dart';
 
 // Pickup
 import '../features/pickup/presentation/screens/pickup_quantity_screen.dart';
@@ -169,6 +170,13 @@ GoRouter _createRouter(Ref ref) {
         GoRoute(
           path: '/home/profile',
           builder: (context, state) => const ProfileScreen(),
+        ),
+        GoRoute(
+          path: '/tips/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id'] ?? '';
+            return TipDetailScreen(tipId: id);
+          },
         ),
       ],
     ),

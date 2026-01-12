@@ -235,7 +235,10 @@ class PickupReviewScreen extends ConsumerWidget {
                   onPressed: () async {
                     final result =
                         await ref.read(pickupProvider.notifier).submitPickup();
-                    if (result != null && context.mounted) {
+
+                    if (!context.mounted) return;
+
+                    if (result != null) {
                       context.push(
                         '/pickup/success',
                         extra: {
@@ -243,6 +246,13 @@ class PickupReviewScreen extends ConsumerWidget {
                           'otp': result.otp,
                           'points': pickupState.estimatedPoints,
                         },
+                      );
+                    } else {
+                      final error =
+                          ref.read(pickupProvider).errorMessage ??
+                              'Pickup tidak bisa dikonfirmasi. Coba lagi.';
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(error)),
                       );
                     }
                   },

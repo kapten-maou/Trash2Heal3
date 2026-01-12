@@ -68,6 +68,7 @@ class PickupQuantityScreen extends ConsumerWidget {
                       categoryId: categoryId,
                       name: category['name'] as String,
                       icon: category['icon'] as String,
+                      imageUrl: category['imageUrl'] as String?,
                       value: quantity,
                       onChanged: (value) {
                         ref.read(pickupProvider.notifier).updateQuantity(

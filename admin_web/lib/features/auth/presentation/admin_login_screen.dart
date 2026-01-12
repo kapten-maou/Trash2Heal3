@@ -14,6 +14,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../../../core/theme/admin_theme.dart';
+import '../../../core/constants/branding.dart';
 import '../providers/auth_provider.dart';
 
 class AdminLoginScreen extends ConsumerStatefulWidget {
@@ -117,13 +118,22 @@ class _AdminLoginScreenState extends ConsumerState<AdminLoginScreen> {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AdminTheme.primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
+                          image: const DecorationImage(
+                            image: NetworkImage(Branding.heroUrl),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.recycling_rounded,
-                          size: 64,
-                          color: AdminTheme.primaryColor,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(12),
+                            color: Colors.black.withOpacity(0.25),
+                          ),
+                          child: const Icon(
+                            Icons.recycling_rounded,
+                            size: 64,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                       const SizedBox(height: 24),
